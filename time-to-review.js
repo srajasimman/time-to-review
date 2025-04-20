@@ -37,12 +37,16 @@ async function run() {
     // Calculate estimated review time
     const reviewTime = calculateReviewTime(pullRequest, commits, files);
     const reviewLabel = getReviewLabel(reviewTime);
+    const labelColor = getLabelColor(reviewTime);
     
     console.log(`Estimated review time: ${reviewTime} minutes`);
-    console.log(`Applying label: ${reviewLabel}`);
+    console.log(`Applying label: ${reviewLabel} with color: ${labelColor}`);
     
     // Remove any existing time review labels
     await removeExistingTimeLabels(octokit, owner, repo, pull_number);
+    
+    // Ensure the label exists with the correct color
+    await ensureLabelExists(octokit, owner, repo, reviewLabel, labelColor);
     
     // Add the review time label
     await octokit.rest.issues.addLabels({
@@ -222,6 +226,58 @@ function getReviewLabel(minutes) {
   
   // If longer than the largest option, use the largest
   return `${timeOptions[timeOptions.length - 1]} min review`;
+}
+
+/**
+ * Get the appropriate color for the review time label
+ * 1 min review = green
+ * 5-10 min review = yellow
+ * above 10 min review = red
+ */
+function getLabelColor(minutes) {
+  if (minutes <= 1) {
+    return '2da44e'; // Green
+  } else if (minutes <= 10) {
+    return 'ffd700'; // Yellow
+  } else {
+    return 'd73a4a'; // Red
+  }
+}
+
+/**
+ * Ensure a label exists with the correct color
+ */
+async function ensureLabelExists(octokit, owner, repo, name, color) {
+  try {
+    // Try to get the label
+    await octokit.rest.issues.getLabel({
+      owner,
+      repo,
+      name,
+    });
+    
+    // If the label exists, update its color
+    await octokit.rest.issues.updateLabel({
+      owner,
+      repo,
+      name,
+      color,
+    });
+    console.log(`Updated color of existing label: ${name}`);
+  } catch (error) {
+    // If the label doesn't exist, create it
+    if (error.status === 404) {
+      await octokit.rest.issues.createLabel({
+        owner,
+        repo,
+        name,
+        color,
+      });
+      console.log(`Created new label: ${name}`);
+    } else {
+      throw error;
+    }
+  }
 }
 
 /**
