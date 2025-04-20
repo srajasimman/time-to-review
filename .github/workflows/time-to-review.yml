@@ -1,0 +1,28 @@
+name: Time to Review
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+jobs:
+  time-to-review:
+    runs-on: ubuntu-latest
+    name: Calculate review time
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Calculate review time
+        uses: ./
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

@@ -1,0 +1,13 @@
+name: 'Time to Review'
+description: 'Estimates pull request review time and adds appropriate labels'
+inputs:
+  github-token:
+    description: 'GitHub token for API access'
+    required: true
+    default: ${{ github.token }}
+runs:
+  using: 'node20'
+  main: 'dist/index.js'
+branding:
+  icon: 'clock'
+  color: 'blue'
