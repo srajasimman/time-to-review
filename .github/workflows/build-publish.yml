@@ -1,0 +1,71 @@
+name: Build and Publish Action
+
+on:
+  push:
+    branches:
+      - main
+    paths-ignore:
+      - '**.md'
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build the action
+        run: npm run build
+      
+      - name: Commit and push build results
+        if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+        run: |
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git add dist/ -f
+          git commit -m "chore: update build artifacts" || echo "No changes to commit"
+          git push origin main || echo "Nothing to push"
+
+  publish:
+    needs: build
+    if: github.event_name == 'release'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+        
+      - name: Build the action
+        run: npm run build
+        
+      - name: Create tag for major version
+        run: |
+          TAG_NAME="${{ github.event.release.tag_name }}"
+          MAJOR_VERSION=$(echo $TAG_NAME | cut -d '.' -f 1)
+          git config --global user.name 'github-actions'
+          git config --global user.email 'github-actions@github.com'
+          git tag -f $MAJOR_VERSION
+          git push -f origin $MAJOR_VERSION
