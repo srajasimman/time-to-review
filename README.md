@@ -57,12 +57,17 @@ jobs:
 
 The action will add one of the following labels to your pull request:
 
-- `1 min review`
-- `5 min review`
-- `10 min review`
-- `15 min review`
-- `20 min review`
-- `30 min review`
+- `1 min review` (🟢 Green)
+- `5 min review` (🟡 Yellow)
+- `10 min review` (🟡 Yellow)
+- `15 min review` (🔴 Red)
+- `20 min review` (🔴 Red)
+- `30 min review` (🔴 Red)
+
+The labels are color-coded for quick visual priority assessment:
+- Green: Quick reviews (1 minute)
+- Yellow: Medium reviews (5-10 minutes)
+- Red: Longer reviews (>10 minutes)
 
 ## License
 
