@@ -19,7 +19,7 @@ jobs:
           node-version: '20'
       
       - name: Validate Commit Messages
-        uses: ./  # Assumes action is in the root directory
+        uses: srajasimman/conventional-commit-validator@v1
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           # Optional: customize regex pattern
