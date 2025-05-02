@@ -1,6 +1,7 @@
 # Time to Review
 
 A GitHub Action that automatically estimates the time required to review a pull request and adds an appropriate time-based label.
+![image](https://github.com/user-attachments/assets/8391fe40-eb9a-47b8-aafe-37645d7f1003)
 
 ## How it works
 
